@@ -1,3 +1,9 @@
+// Vercel exposes its deployment host at runtime. NextAuth v4 still expects
+// NEXTAUTH_URL for correct OAuth callback generation in production.
+if (!process.env.NEXTAUTH_URL) {
+  const vercelHost = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+  if (vercelHost) process.env.NEXTAUTH_URL = "https://" + vercelHost;
+}
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
