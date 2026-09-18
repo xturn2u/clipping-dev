@@ -18,7 +18,7 @@ export async function POST(req) {
       return new NextResponse("No file provided", { status: 400 });
     }
 
-    const apiKey = config.ai.headshot.apiKey;
+    const apiKey = config.ai.aiclips.apiKey;
     if (!apiKey) {
       return new NextResponse("API Key not configured", { status: 500 });
     }
