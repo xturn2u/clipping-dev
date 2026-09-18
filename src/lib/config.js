@@ -19,9 +19,28 @@ const config = {
     secretKey: process.env.STRIPE_SECRET_KEY,
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
     plans: {
-      default: {
-        amount: 50, // 10 Headshots (5 credits each)
-        price: 900, // $9.00
+      basic: {
+        name: "Basic Pack",
+        credits: 100,
+        price: 500,
+        currency: "usd",
+      },
+      standard: {
+        name: "Standard Pack",
+        credits: 250,
+        price: 1000,
+        currency: "usd",
+      },
+      pro: {
+        name: "Professional Pack",
+        credits: 600,
+        price: 2000,
+        currency: "usd",
+      },
+      business: {
+        name: "Business Pack",
+        credits: 2000,
+        price: 5000,
         currency: "usd",
       }
     }
@@ -35,7 +54,8 @@ const config = {
   },
   db: {
     url: process.env.DATABASE_URL,
-  }
+  },
+  theme: process.env.NEXT_PUBLIC_THEME || "emerald",
 };
 
 // Simple validation to warn if critical keys are missing
