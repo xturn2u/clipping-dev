@@ -4,7 +4,8 @@ import { BillingService } from "@/lib/services/billing";
 
 export async function POST(req) {
   const body = await req.text();
-  const signature = headers().get("Stripe-Signature");
+  const headersList = await headers();
+  const signature = headersList.get("stripe-signature");
 
   try {
     await BillingService.handleWebhook(body, signature);
