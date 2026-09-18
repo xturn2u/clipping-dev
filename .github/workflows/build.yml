@@ -1,0 +1,58 @@
+name: Build and deployment check
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: clipping
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d clipping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/clipping
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/clipping
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: ci-only-secret-not-for-production
+      GOOGLE_CLIENT_ID: ci-client-id
+      GOOGLE_CLIENT_SECRET: ci-client-secret
+      AICLIPS_API_KEY: ci-muapi-key
+      WEBHOOK_URL: http://localhost:3000
+      STRIPE_SECRET_KEY: sk_test_ci_placeholder
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_ci_placeholder
+      STRIPE_WEBHOOK_SECRET: whsec_ci_placeholder
+      NEXT_PUBLIC_THEME: emerald
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Initialize test database
+        run: npm run db:push
+
+      - name: Build Next.js application
+        run: npm run build
