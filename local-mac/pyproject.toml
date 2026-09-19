@@ -7,10 +7,19 @@ dependencies = [
   "mlx-whisper>=0.4.0",
   "yt-dlp>=2026.1.0",
   "ollama>=0.6.0",
+  "fastapi>=0.116.0",
+  "uvicorn>=0.35.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pyinstaller>=6.15.0",
+  "pytest>=8.4.0",
 ]
 
 [project.scripts]
 localshorts = "localshorts.cli:main"
+localshorts-sidecar = "localshorts.sidecar:main"
 
 [build-system]
 requires = ["setuptools>=75", "wheel"]
