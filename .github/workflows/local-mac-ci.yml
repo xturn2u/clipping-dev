@@ -1,0 +1,55 @@
+name: Local Mac MVP checks
+
+on:
+  push:
+    branches:
+      - feature/local-mac-mvp
+    paths:
+      - "local-mac/**"
+      - ".github/workflows/local-mac-ci.yml"
+  pull_request:
+    paths:
+      - "local-mac/**"
+      - ".github/workflows/local-mac-ci.yml"
+
+jobs:
+  syntax-and-tauri:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Python syntax
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: python -m compileall -q local-mac/src
+
+      - name: Validate JSON
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          for path in [
+              Path("local-mac/desktop/src-tauri/tauri.conf.json"),
+              Path("local-mac/desktop/src-tauri/capabilities/default.json"),
+              Path("local-mac/desktop/package.json"),
+          ]:
+              json.loads(path.read_text())
+              print("OK", path)
+          PY
+
+      - name: Prepare dummy sidecar for Tauri config validation
+        run: |
+          TARGET="$(rustc -Vv | awk '/host:/ {print $2}')"
+          mkdir -p local-mac/desktop/src-tauri/binaries
+          printf '#!/usr/bin/env sh\nexit 0\n' > "local-mac/desktop/src-tauri/binaries/localshorts-sidecar-$TARGET"
+          chmod +x "local-mac/desktop/src-tauri/binaries/localshorts-sidecar-$TARGET"
+
+      - name: Install desktop CLI
+        working-directory: local-mac/desktop
+        run: npm install
+
+      - name: Rust/Tauri check
+        working-directory: local-mac/desktop/src-tauri
+        run: cargo check
