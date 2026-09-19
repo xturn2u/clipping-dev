@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import threading
 import uuid
 from dataclasses import dataclass, field
@@ -136,6 +137,11 @@ def get_clip(job_id: str, filename: str) -> FileResponse:
 
 
 def main() -> None:
+    # Finder-launched macOS apps often do not inherit the interactive shell PATH.
+    # Make the standard Apple Silicon Homebrew location visible to FFmpeg checks.
+    current_path = os.environ.get("PATH", "")
+    extra = ["/opt/homebrew/bin", "/usr/local/bin"]
+    os.environ["PATH"] = ":".join(extra + [current_path])
     uvicorn.run(app, host=HOST, port=PORT, log_level="info")
 
 
