@@ -50,6 +50,10 @@ jobs:
         working-directory: local-mac/desktop
         run: npm install
 
+      - name: Generate Tauri icons
+        working-directory: local-mac/desktop
+        run: npm run icons
+
       - name: Rust/Tauri check
         working-directory: local-mac/desktop/src-tauri
         run: cargo check
