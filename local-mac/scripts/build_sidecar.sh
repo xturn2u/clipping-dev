@@ -8,7 +8,7 @@ source .venv/bin/activate
 python -m pip install -e ".[dev]"
 
 rm -rf build dist
-pyinstaller   --noconfirm   --clean   --onefile   --name localshorts-sidecar   --collect-all mlx_whisper   --collect-all mlx   --collect-submodules yt_dlp   --collect-submodules ollama   -m localshorts.sidecar
+python -m PyInstaller   --noconfirm   --clean   --onefile   --name localshorts-sidecar   --collect-all mlx_whisper   --collect-all mlx   --collect-submodules yt_dlp   --collect-submodules ollama   sidecar_entry.py
 
 TARGET="$(rustc -Vv | awk '/host:/ {print $2}')"
 DEST="$ROOT/desktop/src-tauri/binaries"
