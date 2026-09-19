@@ -1,0 +1,59 @@
+name: Build LocalShorts DMG
+
+on:
+  push:
+    branches:
+      - feature/local-mac-mvp
+    paths:
+      - "local-mac/**"
+      - ".github/workflows/local-mac-build.yml"
+  workflow_dispatch:
+
+jobs:
+  build-dmg:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify Apple Silicon runner
+        run: |
+          uname -m
+          test "$(uname -m)" = "arm64"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Python build dependencies
+        working-directory: local-mac
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Build Python sidecar
+        working-directory: local-mac
+        run: |
+          python -m PyInstaller             --noconfirm             --clean             --onefile             --name localshorts-sidecar             --collect-all mlx_whisper             --collect-all mlx             --collect-submodules yt_dlp             --collect-submodules ollama             sidecar_entry.py
+          TARGET="$(rustc -Vv | awk '/host:/ {print $2}')"
+          mkdir -p desktop/src-tauri/binaries
+          cp dist/localshorts-sidecar "desktop/src-tauri/binaries/localshorts-sidecar-$TARGET"
+          chmod +x "desktop/src-tauri/binaries/localshorts-sidecar-$TARGET"
+
+      - name: Build Tauri DMG
+        working-directory: local-mac/desktop
+        run: |
+          npm install
+          npm run build
+
+      - name: Upload DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: LocalShorts-macOS-arm64
+          path: local-mac/desktop/src-tauri/target/release/bundle/dmg/*.dmg
+          if-no-files-found: error
