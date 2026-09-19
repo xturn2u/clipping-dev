@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
+    "icons": "tauri icon app-icon.svg",
+    "predev": "npm run icons",
+    "prebuild": "npm run icons",
     "tauri": "tauri",
     "dev": "tauri dev",
     "build": "tauri build"
